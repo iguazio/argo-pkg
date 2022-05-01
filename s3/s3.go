@@ -114,7 +114,8 @@ func GetAssumeRoleCredentials(opts S3ClientOpts) (*credentials.Credentials, erro
 
 func GetCredentials(opts S3ClientOpts) (*credentials.Credentials, error) {
 	if opts.AccessKey != "" && opts.SecretKey != "" {
-		log.WithField("endpoint", opts.Endpoint).Info("Creating minio client using static credentials")
+		log.WithField("endpoint", opts.Endpoint).Info(
+			"Creating igz-overridden minio client %s using static credentials with V2 signature")
 		return credentials.NewStaticV4(opts.AccessKey, opts.SecretKey, ""), nil
 	} else if opts.RoleARN != "" {
 		log.WithField("roleArn", opts.RoleARN).Info("Creating minio client using assumed-role credentials")
@@ -123,8 +124,8 @@ func GetCredentials(opts S3ClientOpts) (*credentials.Credentials, error) {
 		log.Info("Creating minio client using AWS SDK credentials")
 		return GetAWSCredentials(opts)
 	} else {
-		log.Info("Creating minio client using IAM role")
-		return credentials.NewIAM(nullIAMEndpoint), nil
+		log.WithField("endpoint", opts.Endpoint).Info("Creating igz-overridden minio client with V4 signature")
+		return credentials.NewStaticV4(opts.AccessKey, opts.SecretKey, ""), nil
 	}
 }
 
